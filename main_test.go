@@ -11,6 +11,22 @@ func initAnnuaire() {
 	ChargerAnnuaire(filename)
 }
 
+func TestAjoutDoublon(t *testing.T) {
+	initAnnuaire()
+	AjouterContact("Lukhas", "0707070707")
+	AjouterContact("Lukhas", "0808080808")
+	fmt.Println("Liste des contacts après ajout :")
+	ListerContacts()
+
+	contact, ok := annuaire["Lukhas"]
+	if !ok {
+		t.Error("Lukhas n'a pas été ajouté")
+	}
+	if contact.Tel != "0707070707" {
+		t.Errorf("Numéro incorrect pour Lukhas. Attendu: 0707070707, Obtenu: %s", contact.Tel)
+	}
+}
+
 func TestAjouterContact(t *testing.T) {
 	initAnnuaire()
 	AjouterContact("Lukhas", "0707070707")
