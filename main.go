@@ -5,7 +5,9 @@ import (
 	"flag"
 	"fmt"
 	"github.com/fatih/color"
+	"github.com/manifoldco/promptui"
 	"io/ioutil"
+	"os"
 )
 
 var (
@@ -14,6 +16,64 @@ var (
 	warning = color.New(color.FgYellow).SprintFunc()
 	errcol  = color.New(color.FgRed).SprintFunc()
 )
+
+// os exit ? return marche pas...
+func menu() {
+	items := []string{"Ajouter", "Lister", "Rechercher", "Modifier", "Supprimer", "Quitter"}
+	for {
+		prompt := promptui.Select{
+			Label: "Choisissez une action",
+			Items: items,
+		}
+		idx, _, err := prompt.Run()
+		if err != nil {
+			fmt.Println(color.RedString("✘ Erreur de menu:"), err)
+			return
+		}
+
+		switch items[idx] {
+		case "Ajouter":
+			var nom, tel string
+			fmt.Print("Nom : ")
+			fmt.Scanln(&nom)
+			fmt.Print("Tel : ")
+			fmt.Scanln(&tel)
+			AjouterContact(nom, tel)
+			os.Exit(0)
+
+		case "Lister":
+			ListerContacts()
+			os.Exit(0)
+		case "Rechercher":
+			var nom string
+			fmt.Print("Nom à rechercher : ")
+			fmt.Scanln(&nom)
+			RechercherContact(nom)
+			os.Exit(0)
+
+		case "Modifier":
+			var nom, tel string
+			fmt.Print("Nom à modifier : ")
+			fmt.Scanln(&nom)
+			fmt.Print("Nouveau tel : ")
+			fmt.Scanln(&tel)
+			ModifierContact(nom, tel)
+			os.Exit(0)
+
+		case "Supprimer":
+			var nom string
+			fmt.Print("Nom à supprimer : ")
+			fmt.Scanln(&nom)
+			SupprimerContact(nom)
+			os.Exit(0)
+
+		case "Quitter":
+			fmt.Println(color.CyanString("👋 Au revoir !"))
+			os.Exit(0)
+		}
+		fmt.Println()
+	}
+}
 
 type Contact struct {
 	Nom string
@@ -167,8 +227,10 @@ func main() {
 			return
 		}
 		ModifierContact(*nom, *tel)
+
 	default:
 		fmt.Println(errcol("✘ Aucune action spécifiée."))
-		Help()
+		menu()
+		return
 	}
 }
