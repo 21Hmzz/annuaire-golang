@@ -21,6 +21,13 @@ func ListerContacts() {
 		fmt.Printf("- %s : %s\n", c.Nom, c.Tel)
 	}
 }
+func RechercherContact(nom string) {
+	if contact, ok := annuaire[nom]; ok {
+		fmt.Printf("Contact trouvé : %s - %s\n", contact.Nom, contact.Tel)
+	} else {
+		fmt.Println("Contact non trouvé.")
+	}
+}
 
 func AjouterContact(nom, tel string) {
 	if _, existe := annuaire[nom]; existe {
@@ -51,6 +58,12 @@ func main() {
 		ListerContacts()
 	case "lister":
 		ListerContacts()
+	case "rechercher":
+		if *nom == "" {
+			fmt.Println("Nom requis pour rechercher un contact.")
+			return
+		}
+		RechercherContact(*nom)
 	default:
 		fmt.Println("Action non reconnue. Utilisez --action avec : ajouter, rechercher, lister, supprimer, modifier")
 	}
