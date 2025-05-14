@@ -7,9 +7,8 @@ import (
 
 func initAnnuaire() {
 	annuaire = make(map[string]Contact)
-	annuaire["Hamza"] = Contact{Nom: "Hamza", Tel: "0601020303"}
-	annuaire["Valentin"] = Contact{Nom: "Valentin", Tel: "0603040506"}
-	annuaire["Serhat"] = Contact{Nom: "Serhat", Tel: "0602340406"}
+	filename := "contacts.json"
+	ChargerAnnuaire(filename)
 }
 
 func TestAjouterContact(t *testing.T) {
@@ -30,6 +29,8 @@ func TestAjouterContact(t *testing.T) {
 func TestModifierContact(t *testing.T) {
 	initAnnuaire()
 
+	AjouterContact("Serhat", "0505050505")
+
 	ModifierContact("Serhat", "0600000000")
 	fmt.Println("Liste des contacts après modification :")
 	ListerContacts()
@@ -41,6 +42,8 @@ func TestModifierContact(t *testing.T) {
 
 func TestSupprimerContact(t *testing.T) {
 	initAnnuaire()
+
+	AjouterContact("Valentin", "0808080808")
 
 	SupprimerContact("Valentin")
 	fmt.Println("Liste des contacts après suppression :")
