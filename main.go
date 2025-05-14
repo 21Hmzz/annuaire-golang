@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 )
 
 type Contact struct {
@@ -11,6 +13,46 @@ type Contact struct {
 }
 
 var annuaire = make(map[string]Contact)
+
+func ChargerAnnuaire(filename string) {
+	file, err := ioutil.ReadFile(filename)
+	if err != nil {
+		fmt.Println("Erreur lors de la lecture du fichier:", err)
+		return
+	}
+
+	var contacts []Contact
+	err = json.Unmarshal(file, &contacts)
+	if err != nil {
+		fmt.Println("Erreur lors du décodage JSON:", err)
+		return
+	}
+
+	for _, contact := range contacts {
+		annuaire[contact.Nom] = contact
+	}
+	fmt.Println("Contacts chargés depuis le fichier", filename)
+}
+func SauvegarderAnnuaire(filename string) {
+	contacts := make([]Contact, 0, len(annuaire))
+	for _, contact := range annuaire {
+		contacts = append(contacts, contact)
+	}
+
+	data, err := json.MarshalIndent(contacts, "", "  ")
+	if err != nil {
+		fmt.Println("Erreur lors de l'encodage JSON :", err)
+		return
+	}
+
+	err = ioutil.WriteFile(filename, data, 0644)
+	if err != nil {
+		fmt.Println("Erreur lors de l'écriture du fichier :", err)
+		return
+	}
+
+	fmt.Println("Annuaire sauvegardé dans le fichier", filename)
+}
 
 func ListerContacts() {
 	if len(annuaire) == 0 {
@@ -35,6 +77,8 @@ func AjouterContact(nom, tel string) {
 		return
 	}
 	annuaire[nom] = Contact{Nom: nom, Tel: tel}
+	SauvegarderAnnuaire("contacts.json")
+
 	fmt.Println("Contact ajouté :", nom)
 }
 
@@ -45,6 +89,9 @@ func SupprimerContact(nom string) {
 	} else {
 		fmt.Println("Contact introuvable.")
 	}
+
+	SauvegarderAnnuaire("contacts.json")
+
 }
 
 func ModifierContact(nom, nouveauTel string) {
@@ -54,12 +101,13 @@ func ModifierContact(nom, nouveauTel string) {
 	} else {
 		fmt.Println("Contact introuvable.")
 	}
+	SauvegarderAnnuaire("contacts.json")
+
 }
 
 func main() {
-	annuaire["Hamza"] = Contact{Nom: "Hamza", Tel: "0601020303"}
-	annuaire["Valentin"] = Contact{Nom: "Valentin", Tel: "0603040506"}
-	annuaire["Serhat"] = Contact{Nom: "Serhat", Tel: "0602340406"}
+	file := "contacts.json"
+	ChargerAnnuaire(file)
 
 	action := flag.String("action", "", "actions possible : ajouter, rechercher, lister, supprimer, modifier")
 	nom := flag.String("nom", "", "Nom du contact")
