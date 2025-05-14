@@ -4,7 +4,15 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/fatih/color"
 	"io/ioutil"
+)
+
+var (
+	info    = color.New(color.FgCyan).SprintFunc()
+	success = color.New(color.FgGreen).SprintFunc()
+	warning = color.New(color.FgYellow).SprintFunc()
+	errcol  = color.New(color.FgRed).SprintFunc()
 )
 
 type Contact struct {
@@ -17,21 +25,20 @@ var annuaire = make(map[string]Contact)
 func ChargerAnnuaire(filename string) {
 	file, err := ioutil.ReadFile(filename)
 	if err != nil {
-		fmt.Println("Erreur lors de la lecture du fichier:", err)
+		fmt.Println(errcol("Erreur lors de la lecture du fichier:"), err)
 		return
 	}
 
 	var contacts []Contact
-	err = json.Unmarshal(file, &contacts)
-	if err != nil {
-		fmt.Println("Erreur lors du décodage JSON:", err)
+	if err := json.Unmarshal(file, &contacts); err != nil {
+		fmt.Println(errcol("Erreur lors du décodage JSON:"), err)
 		return
 	}
 
 	for _, contact := range contacts {
 		annuaire[contact.Nom] = contact
 	}
-	fmt.Println("Contacts chargés depuis le fichier", filename)
+	fmt.Println(success("✔ Contacts chargés depuis le fichier"), info(filename))
 }
 func SauvegarderAnnuaire(filename string) {
 	contacts := make([]Contact, 0, len(annuaire))
@@ -41,53 +48,57 @@ func SauvegarderAnnuaire(filename string) {
 
 	data, err := json.MarshalIndent(contacts, "", "  ")
 	if err != nil {
-		fmt.Println("Erreur lors de l'encodage JSON :", err)
+		fmt.Println(errcol("Erreur lors de l'encodage JSON:"), err)
 		return
 	}
 
-	err = ioutil.WriteFile(filename, data, 0644)
-	if err != nil {
-		fmt.Println("Erreur lors de l'écriture du fichier :", err)
+	if err := ioutil.WriteFile(filename, data, 0644); err != nil {
+		fmt.Println(errcol("Erreur lors de l'écriture du fichier:"), err)
 		return
 	}
 
-	fmt.Println("Annuaire sauvegardé dans le fichier", filename)
+	fmt.Println(success("✔ Annuaire sauvegardé dans"), info(filename))
 }
 
 func ListerContacts() {
 	if len(annuaire) == 0 {
-		fmt.Println("Annuaire vide.")
+		fmt.Println(warning("⚠ Annuaire vide."))
 		return
 	}
 	for _, c := range annuaire {
-		fmt.Printf("- %s : %s\n", c.Nom, c.Tel)
+		fmt.Printf("  - %s : %s\n", color.New(color.Bold).Sprint(c.Nom), color.New(color.Italic).Sprint(c.Tel))
 	}
 }
+
 func RechercherContact(nom string) {
 	if contact, ok := annuaire[nom]; ok {
-		fmt.Printf("Contact trouvé : %s - %s\n", contact.Nom, contact.Tel)
+		fmt.Printf("%s Contact trouvé : %s - %s\n",
+			success("✔"),
+			color.New(color.Bold).Sprint(contact.Nom),
+			color.New(color.Underline).Sprint(contact.Tel),
+		)
 	} else {
-		fmt.Println("Contact non trouvé.")
+		fmt.Println(errcol("✘ Contact non trouvé."))
 	}
 }
 
 func AjouterContact(nom, tel string) {
 	if _, existe := annuaire[nom]; existe {
-		fmt.Println("Contact déjà existant.")
+		fmt.Println(errcol("✘ Ce contact existe déjà."))
 		return
 	}
 	annuaire[nom] = Contact{Nom: nom, Tel: tel}
 	SauvegarderAnnuaire("contacts.json")
 
-	fmt.Println("Contact ajouté :", nom)
+	fmt.Println(success("✔ Contact ajouté :"), info(nom))
 }
 
 func SupprimerContact(nom string) {
 	if _, ok := annuaire[nom]; ok {
 		delete(annuaire, nom)
-		fmt.Println("Contact supprimé :", nom)
+		fmt.Println(success("✔ Contact supprimé :"), info(nom))
 	} else {
-		fmt.Println("Contact introuvable.")
+		fmt.Println(errcol("✘ Contact introuvable."))
 	}
 
 	SauvegarderAnnuaire("contacts.json")
@@ -97,9 +108,9 @@ func SupprimerContact(nom string) {
 func ModifierContact(nom, nouveauTel string) {
 	if _, ok := annuaire[nom]; ok {
 		annuaire[nom] = Contact{Nom: nom, Tel: nouveauTel}
-		fmt.Println("Contact modifié :", nom)
+		fmt.Println(success("✔ Contact modifié :"), info(nom))
 	} else {
-		fmt.Println("Contact introuvable.")
+		fmt.Println(errcol("✘ Contact introuvable."))
 	}
 	SauvegarderAnnuaire("contacts.json")
 
@@ -116,37 +127,31 @@ func main() {
 	switch *action {
 	case "ajouter":
 		if *nom == "" || *tel == "" {
-			fmt.Println("Nom et numéro de téléphone requis pour ajouter un contact.")
+			fmt.Println(info("Nom et numéro de téléphone requis pour ajouter un contact."))
 			return
 		}
 		AjouterContact(*nom, *tel)
-		fmt.Println("Liste des contacts :")
-		ListerContacts()
 	case "lister":
 		ListerContacts()
 	case "rechercher":
 		if *nom == "" {
-			fmt.Println("Nom requis pour rechercher un contact.")
+			fmt.Println(errcol("Nom requis pour rechercher un contact."))
 			return
 		}
 		RechercherContact(*nom)
 	case "supprimer":
 		if *nom == "" {
-			fmt.Println("Nom requis pour supprimer un contact.")
+			fmt.Println(errcol("Nom requis pour supprimer un contact."))
 			return
 		}
 		SupprimerContact(*nom)
-		fmt.Println("Liste des contacts :")
-		ListerContacts()
 	case "modifier":
 		if *nom == "" || *tel == "" {
-			fmt.Println("Nom et numéro de téléphone requis pour modifier un contact.")
+			fmt.Println(errcol("Nom et numéro de téléphone requis pour modifier un contact."))
 			return
 		}
 		ModifierContact(*nom, *tel)
-		fmt.Println("Liste des contacts :")
-		ListerContacts()
 	default:
-		fmt.Println("Action non reconnue. Utilisez --action avec : ajouter, rechercher, lister, supprimer, modifier")
+		fmt.Println(errcol("✘ Action non reconnue."))
 	}
 }
