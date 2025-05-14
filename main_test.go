@@ -38,3 +38,14 @@ func TestModifierContact(t *testing.T) {
 		t.Errorf("Modification échouée. Attendu: 0600000000, Obtenu: %s", contact.Tel)
 	}
 }
+
+func TestSupprimerContact(t *testing.T) {
+	initAnnuaire()
+
+	SupprimerContact("Valentin")
+	fmt.Println("Liste des contacts après suppression :")
+	ListerContacts()
+	if _, ok := annuaire["Valentin"]; ok {
+		t.Error("Valentin aurait dû être supprimée")
+	}
+}
