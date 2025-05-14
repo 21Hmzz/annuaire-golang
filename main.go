@@ -38,6 +38,15 @@ func AjouterContact(nom, tel string) {
 	fmt.Println("Contact ajouté :", nom)
 }
 
+func SupprimerContact(nom string) {
+	if _, ok := annuaire[nom]; ok {
+		delete(annuaire, nom)
+		fmt.Println("Contact supprimé :", nom)
+	} else {
+		fmt.Println("Contact introuvable.")
+	}
+}
+
 func main() {
 	annuaire["Hamza"] = Contact{Nom: "Hamza", Tel: "0601020303"}
 	annuaire["Valentin"] = Contact{Nom: "Valentin", Tel: "0603040506"}
@@ -64,6 +73,14 @@ func main() {
 			return
 		}
 		RechercherContact(*nom)
+	case "supprimer":
+		if *nom == "" {
+			fmt.Println("Nom requis pour supprimer un contact.")
+			return
+		}
+		SupprimerContact(*nom)
+		fmt.Println("Liste des contacts :")
+		ListerContacts()
 	default:
 		fmt.Println("Action non reconnue. Utilisez --action avec : ajouter, rechercher, lister, supprimer, modifier")
 	}
