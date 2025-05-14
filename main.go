@@ -116,14 +116,30 @@ func ModifierContact(nom, nouveauTel string) {
 
 }
 
+func Help() {
+	fmt.Println(warning("⚠ Aide :"))
+	fmt.Println(info("  - ajouter : Ajouter un contact"))
+	fmt.Println(info("  - rechercher : Rechercher un contact"))
+	fmt.Println(info("  - lister : Lister tous les contacts"))
+	fmt.Println(errcol("  - supprimer : Supprimer un contact"))
+	fmt.Println(warning("  - modifier : Modifier un contact"))
+}
+
 func main() {
-	file := "contacts.json"
-	ChargerAnnuaire(file)
 
 	action := flag.String("action", "", "actions possible : ajouter, rechercher, lister, supprimer, modifier")
 	nom := flag.String("nom", "", "Nom du contact")
 	tel := flag.String("tel", "", "Numéro de téléphone du contact")
+	help := flag.Bool("help", false, "Afficher l'aide")
 	flag.Parse()
+
+	if *help {
+		Help()
+		return
+	}
+
+	file := "contacts.json"
+	ChargerAnnuaire(file)
 	switch *action {
 	case "ajouter":
 		if *nom == "" || *tel == "" {
@@ -152,6 +168,7 @@ func main() {
 		}
 		ModifierContact(*nom, *tel)
 	default:
-		fmt.Println(errcol("✘ Action non reconnue."))
+		fmt.Println(errcol("✘ Aucune action spécifiée."))
+		Help()
 	}
 }
