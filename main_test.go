@@ -26,3 +26,15 @@ func TestAjouterContact(t *testing.T) {
 		t.Errorf("Numéro incorrect pour Lukhas. Attendu: 0707070707, Obtenu: %s", contact.Tel)
 	}
 }
+
+func TestModifierContact(t *testing.T) {
+	initAnnuaire()
+
+	ModifierContact("Serhat", "0600000000")
+	fmt.Println("Liste des contacts après modification :")
+	ListerContacts()
+	contact := annuaire["Serhat"]
+	if contact.Tel != "0600000000" {
+		t.Errorf("Modification échouée. Attendu: 0600000000, Obtenu: %s", contact.Tel)
+	}
+}
