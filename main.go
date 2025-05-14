@@ -47,6 +47,15 @@ func SupprimerContact(nom string) {
 	}
 }
 
+func ModifierContact(nom, nouveauTel string) {
+	if _, ok := annuaire[nom]; ok {
+		annuaire[nom] = Contact{Nom: nom, Tel: nouveauTel}
+		fmt.Println("Contact modifié :", nom)
+	} else {
+		fmt.Println("Contact introuvable.")
+	}
+}
+
 func main() {
 	annuaire["Hamza"] = Contact{Nom: "Hamza", Tel: "0601020303"}
 	annuaire["Valentin"] = Contact{Nom: "Valentin", Tel: "0603040506"}
@@ -79,6 +88,14 @@ func main() {
 			return
 		}
 		SupprimerContact(*nom)
+		fmt.Println("Liste des contacts :")
+		ListerContacts()
+	case "modifier":
+		if *nom == "" || *tel == "" {
+			fmt.Println("Nom et numéro de téléphone requis pour modifier un contact.")
+			return
+		}
+		ModifierContact(*nom, *tel)
 		fmt.Println("Liste des contacts :")
 		ListerContacts()
 	default:
