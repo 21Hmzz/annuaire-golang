@@ -22,14 +22,33 @@ func ListerContacts() {
 	}
 }
 
+func AjouterContact(nom, tel string) {
+	if _, existe := annuaire[nom]; existe {
+		fmt.Println("Contact déjà existant.")
+		return
+	}
+	annuaire[nom] = Contact{Nom: nom, Tel: tel}
+	fmt.Println("Contact ajouté :", nom)
+}
+
 func main() {
 	annuaire["Hamza"] = Contact{Nom: "Hamza", Tel: "0601020303"}
 	annuaire["Valentin"] = Contact{Nom: "Valentin", Tel: "0603040506"}
 	annuaire["Serhat"] = Contact{Nom: "Serhat", Tel: "0602340406"}
 
 	action := flag.String("action", "", "actions possible : ajouter, rechercher, lister, supprimer, modifier")
+	nom := flag.String("nom", "", "Nom du contact")
+	tel := flag.String("tel", "", "Numéro de téléphone du contact")
 	flag.Parse()
 	switch *action {
+	case "ajouter":
+		if *nom == "" || *tel == "" {
+			fmt.Println("Nom et numéro de téléphone requis pour ajouter un contact.")
+			return
+		}
+		AjouterContact(*nom, *tel)
+		fmt.Println("Liste des contacts :")
+		ListerContacts()
 	case "lister":
 		ListerContacts()
 	default:
